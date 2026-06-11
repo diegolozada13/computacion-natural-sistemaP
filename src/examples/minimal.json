@@ -1,0 +1,36 @@
+{
+  "seed": 42,
+  "alphabet": ["a", "b"],
+  "membranes": {
+    "1": {
+      "objects": {}
+    },
+    "2": {
+      "objects": {
+        "a": 1
+      }
+    },
+    "3": {
+      "objects": {}
+    }
+  },
+  "rules": [
+    {
+      "id": "r1",
+      "membrane": 2,
+      "lhs": {
+        "a": 1
+      },
+      "rhs": [
+        {
+          "object": "b",
+          "count": 1,
+          "target": "here"
+        }
+      ]
+    }
+  ],
+  "output_membrane": 1,
+  "max_steps": 10
+}
+
