@@ -7,8 +7,8 @@ from dataclasses import dataclass, field
 from src.models._validation import (
     counter_contains,
     normalize_counter,
+    validate_identifier,
     validate_positive_int,
-    validate_symbol,
 )
 from src.models.produced_object import ProducedObject
 
@@ -23,7 +23,7 @@ class Rule:
     rhs: list[ProducedObject] = field(default_factory=list)
 
     def __post_init__(self) -> None:
-        validate_symbol(self.id, "rule id")
+        validate_identifier(self.id, "rule id")
         validate_positive_int(self.membrane_id, "membrane id")
         self.lhs = normalize_counter(self.lhs, "lhs")
         if not self.lhs:
@@ -74,4 +74,3 @@ class Rule:
             raise ValueError(
                 f"rule {self.id!r} uses symbols outside the alphabet: {sorted(unknown_symbols)}"
             )
-

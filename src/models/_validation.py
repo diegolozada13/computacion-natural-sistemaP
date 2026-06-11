@@ -6,17 +6,22 @@ from collections.abc import Mapping
 
 def validate_positive_int(value: int, field_name: str) -> None:
     if type(value) is not int or value <= 0:
-        raise ValueError(f"{field_name} must be a positive integer")
+        raise ValueError(f"{field_name} tiene que ser un entero positivo")
 
 
 def validate_non_negative_int(value: int, field_name: str) -> None:
     if type(value) is not int or value < 0:
-        raise ValueError(f"{field_name} must be a non-negative integer")
+        raise ValueError(f"{field_name} tiene que ser un entero no negativo")
 
 
 def validate_symbol(symbol: str, field_name: str = "symbol") -> None:
     if not isinstance(symbol, str) or not symbol.strip():
-        raise ValueError(f"{field_name} must be a non-empty string")
+        raise ValueError(f"{field_name} tiene que ser una cadena no vacía")
+
+
+def validate_identifier(value: str, field_name: str = "identifier") -> None:
+    if not isinstance(value, str) or not value.strip():
+        raise ValueError(f"{field_name} tiene que ser una cadena no vacía")
 
 
 def normalize_counter(
@@ -37,4 +42,3 @@ def normalize_counter(
 
 def counter_contains(available: Counter[str], required: Counter[str]) -> bool:
     return all(available[symbol] >= count for symbol, count in required.items())
-
