@@ -1,0 +1,50 @@
+{
+  "alphabet": ["a", "b", "c", "d"],
+  "membranes": {
+    "1": {
+      "objects": {}
+    },
+    "2": {
+      "objects": {
+        "a": 1
+      }
+    },
+    "3": {
+      "objects": {
+        "c": 1
+      }
+    }
+  },
+  "rules": [
+    {
+      "id": "send_a_to_membrane_3",
+      "membrane": 2,
+      "lhs": {
+        "a": 1
+      },
+      "rhs": [
+        {
+          "object": "b",
+          "count": 1,
+          "target": "in_3"
+        }
+      ]
+    },
+    {
+      "id": "send_c_out",
+      "membrane": 3,
+      "lhs": {
+        "c": 1
+      },
+      "rhs": [
+        {
+          "object": "d",
+          "count": 1,
+          "target": "out"
+        }
+      ]
+    }
+  ],
+  "output_membrane": 1
+}
+

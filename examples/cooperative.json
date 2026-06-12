@@ -1,0 +1,50 @@
+{
+  "alphabet": ["a", "b", "c", "d"],
+  "membranes": {
+    "1": {
+      "objects": {}
+    },
+    "2": {
+      "objects": {
+        "a": 2,
+        "b": 1
+      }
+    },
+    "3": {
+      "objects": {}
+    }
+  },
+  "rules": [
+    {
+      "id": "cooperative_ab_to_c",
+      "membrane": 2,
+      "lhs": {
+        "a": 1,
+        "b": 1
+      },
+      "rhs": [
+        {
+          "object": "c",
+          "count": 1,
+          "target": "here"
+        }
+      ]
+    },
+    {
+      "id": "remaining_a_to_d",
+      "membrane": 2,
+      "lhs": {
+        "a": 1
+      },
+      "rhs": [
+        {
+          "object": "d",
+          "count": 1,
+          "target": "here"
+        }
+      ]
+    }
+  ],
+  "output_membrane": 1
+}
+
