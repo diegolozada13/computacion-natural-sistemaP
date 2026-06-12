@@ -220,13 +220,17 @@ El simulador deberá proporcionar una interfaz gráfica que permita:
 
 ---
 
-## RF-16: Reproducibilidad
+## RF-16: Reproducibilidad y semilla opcional
 
-El simulador deberá permitir fijar una semilla de ejecución para controlar los procesos aleatorios utilizados durante la selección de reglas.
+El simulador deberá producir ejecuciones reproducibles cuando se utilice la misma configuración inicial y la misma lista ordenada de reglas.
 
-Cuando se utilice la misma semilla y la misma configuración inicial, el simulador deberá producir exactamente la misma secuencia de configuraciones.
+En la versión actual, la selección de reglas en modo Maximal Parallel será determinista:
 
-Si no se especifica ninguna semilla, el simulador podrá utilizar una semilla generada automáticamente.
+* Las membranas se recorren por identificador ascendente.
+* Las reglas de cada membrana se recorren en el orden en que aparecen definidas.
+* En caso de conflicto por objetos, se selecciona primero la regla aplicable que aparezca antes en la lista.
+
+El campo `seed` podrá aparecer en el JSON como valor opcional y se almacenará en `PSystem`, pero no será utilizado por el motor mientras no existan estrategias aleatorias.
 
 ---
 

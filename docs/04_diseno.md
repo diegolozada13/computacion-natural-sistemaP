@@ -565,13 +565,20 @@ Esto garantiza que todas las reglas trabajen sobre la misma configuración inici
 
 ## Estrategia de Selección
 
-Los Sistemas P son modelos inherentemente no deterministas.
+Los Sistemas P son modelos inherentemente no deterministas a nivel teórico.
 
-Por tanto, cuando existan varias reglas aplicables simultáneamente, el simulador podrá seleccionar cualquiera de ellas.
+En esta implementación, la selección del conjunto máximamente paralelo será determinista para facilitar la depuración, la comparación de resultados y la ejecución reproducible de tests.
 
-La primera versión utilizará una estrategia aleatoria controlada.
+La estrategia concreta será por orden estable:
 
-Esta decisión permite aproximarse mejor al comportamiento teórico del modelo.
+1. Se recorren las membranas por identificador ascendente.
+2. Dentro de cada membrana, se recorren las reglas en el orden en que fueron definidas.
+3. Se selecciona la primera regla aplicable con los objetos todavía disponibles.
+4. Tras reservar sus objetos consumidos, se repite el proceso desde el inicio de la lista de reglas de esa membrana.
+
+Este criterio permite aplicar varias veces una misma regla si sigue siendo aplicable. El proceso termina cuando ninguna regla de la membrana puede añadirse con los objetos restantes.
+
+El campo `seed` se conserva en `PSystem` como metadato opcional para futuras estrategias aleatorias, pero no se utiliza en la estrategia determinista actual.
 
 ---
 
@@ -635,9 +642,11 @@ Tras realizar este proceso en todas las membranas, se ejecuta la transición glo
 
 ## Reproducibilidad
 
-Aunque la selección de reglas es no determinista desde el punto de vista teórico, el simulador permitirá fijar una semilla de ejecución.
+Aunque la selección de reglas es no determinista desde el punto de vista teórico, la implementación actual utiliza una estrategia determinista basada en el orden de membranas y reglas.
 
-La semilla se utilizará para inicializar el generador de números aleatorios empleado durante la selección de reglas.
+Por tanto, con la misma definición del sistema, el simulador produce la misma secuencia de configuraciones sin depender de una semilla.
+
+El campo `seed` se mantiene como opcional en `PSystem` y en el formato JSON para permitir futuras estrategias de selección aleatoria controlada.
 
 Ejemplo:
 
