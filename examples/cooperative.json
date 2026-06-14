@@ -6,7 +6,7 @@
     },
     "2": {
       "objects": {
-        "a": 2,
+        "a": 1,
         "b": 1
       }
     },
@@ -31,10 +31,10 @@
       ]
     },
     {
-      "id": "remaining_a_to_d",
+      "id": "evolve_c_to_d",
       "membrane": 2,
       "lhs": {
-        "a": 1
+        "c": 1
       },
       "rhs": [
         {
@@ -47,4 +47,3 @@
   ],
   "output_membrane": 1
 }
-
