@@ -10,15 +10,16 @@ from src.models import ProducedObject, PSystem, Rule
 
 
 class JsonLoaderError(ValueError):
-    """Raised when a JSON P system definition is invalid."""
+    """Indica que una definicion JSON no es valida."""
 
 
 class JsonLoader:
-    """Build PSystem instances from JSON files."""
+    """Construye sistemas P desde documentos JSON."""
 
     REQUIRED_MEMBRANES = {"1", "2", "3"}
 
     def load(self, path: str | Path) -> PSystem:
+        """Carga un sistema P desde un fichero JSON."""
         json_path = Path(path)
         try:
             with json_path.open(encoding="utf-8") as file:
@@ -31,6 +32,7 @@ class JsonLoader:
         return self.load_data(data)
 
     def load_data(self, data: Mapping[str, Any]) -> PSystem:
+        """Construye un sistema P desde datos ya decodificados."""
         document = self._expect_mapping(data, "root")
 
         alphabet = self._parse_alphabet(self._required(document, "alphabet", "root"))
@@ -53,6 +55,7 @@ class JsonLoader:
             raise JsonLoaderError(str(exc)) from exc
 
     def _parse_alphabet(self, value: Any) -> set[str]:
+        """Valida y convierte el alfabeto."""
         if not isinstance(value, list):
             raise JsonLoaderError("alphabet must be a list of strings")
         if not value:
@@ -68,6 +71,7 @@ class JsonLoader:
         return alphabet
 
     def _parse_membranes(self, value: Any) -> dict[int, Counter[str]]:
+        """Extrae los multiconjuntos iniciales de las membranas."""
         membranes = self._expect_mapping(value, "membranes")
         if set(membranes) != self.REQUIRED_MEMBRANES:
             raise JsonLoaderError("membranes must contain exactly keys '1', '2' and '3'")
@@ -86,6 +90,7 @@ class JsonLoader:
         return initial_objects
 
     def _parse_rules(self, value: Any) -> dict[int, list[Rule]]:
+        """Convierte la lista JSON de reglas por membrana."""
         if not isinstance(value, list):
             raise JsonLoaderError("rules must be a list")
 
@@ -107,6 +112,7 @@ class JsonLoader:
         return rules_by_membrane
 
     def _parse_rhs(self, value: Any, rule_context: str) -> list[ProducedObject]:
+        """Convierte los objetos producidos por una regla."""
         if not isinstance(value, list):
             raise JsonLoaderError(f"{rule_context}.rhs must be a list")
         if not value:
@@ -130,6 +136,7 @@ class JsonLoader:
         return produced_objects
 
     def _parse_counter(self, value: Any, context: str) -> Counter[str]:
+        """Convierte un objeto JSON en un multiconjunto."""
         mapping = self._expect_mapping(value, context)
         counter: Counter[str] = Counter()
         for symbol, count in mapping.items():
@@ -146,6 +153,7 @@ class JsonLoader:
         field_name: str,
         context: str,
     ) -> int:
+        """Obtiene un entero obligatorio."""
         value = self._required(mapping, field_name, context)
         if type(value) is not int:
             raise JsonLoaderError(f"{context}.{field_name} must be an integer")
@@ -157,6 +165,7 @@ class JsonLoader:
         field_name: str,
         default: int | None,
     ) -> int | None:
+        """Obtiene un entero opcional."""
         if field_name not in mapping:
             return default
         value = mapping[field_name]
@@ -172,12 +181,13 @@ class JsonLoader:
         field_name: str,
         context: str,
     ) -> Any:
+        """Obtiene un campo obligatorio."""
         if field_name not in mapping:
             raise JsonLoaderError(f"{context}.{field_name} is required")
         return mapping[field_name]
 
     def _expect_mapping(self, value: Any, context: str) -> Mapping[str, Any]:
+        """Valida que un valor JSON sea un objeto."""
         if not isinstance(value, Mapping):
             raise JsonLoaderError(f"{context} must be an object")
         return value
-

@@ -15,7 +15,7 @@ from src.models.produced_object import ProducedObject
 
 @dataclass
 class Rule:
-    """Evolution or communication rule associated with one membrane."""
+    """Representa una regla asociada a una membrana."""
 
     id: str
     membrane_id: int
@@ -23,6 +23,7 @@ class Rule:
     rhs: list[ProducedObject] = field(default_factory=list)
 
     def __post_init__(self) -> None:
+        """Valida y normaliza la regla."""
         validate_identifier(self.id, "rule id")
         validate_positive_int(self.membrane_id, "membrane id")
         self.lhs = normalize_counter(self.lhs, "lhs")
@@ -37,20 +38,25 @@ class Rule:
 
     @property
     def is_cooperative(self) -> bool:
+        """Indica si la regla consume varios objetos."""
         return sum(self.lhs.values()) > 1
 
     @property
     def targets(self) -> set[str]:
+        """Devuelve los destinos usados por la regla."""
         return {produced.target for produced in self.rhs}
 
     def is_applicable(self, objects: Mapping[str, int] | Counter[str]) -> bool:
+        """Comprueba si la regla puede aplicarse al multiconjunto."""
         available = normalize_counter(objects, "objects")
         return counter_contains(available, self.lhs)
 
     def consumed_objects(self) -> Counter[str]:
+        """Devuelve una copia de los objetos consumidos."""
         return Counter(self.lhs)
 
     def produced_objects(self, target: str | None = None) -> Counter[str]:
+        """Agrupa los objetos producidos por destino opcional."""
         produced_objects: Counter[str] = Counter()
         for produced in self.rhs:
             if target is None or produced.target == target:
@@ -62,6 +68,7 @@ class Rule:
         alphabet: set[str] | None = None,
         membrane_ids: Iterable[int] | None = None,
     ) -> None:
+        """Valida la regla frente al alfabeto y las membranas."""
         if membrane_ids is not None and self.membrane_id not in set(membrane_ids):
             raise ValueError(f"rule {self.id!r} references unknown membrane {self.membrane_id}")
 

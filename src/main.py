@@ -16,6 +16,7 @@ DEFAULT_MAX_STEPS = 50
 
 
 def main() -> int:
+    """Ejecuta el simulador desde la linea de comandos."""
     parser = build_parser()
     args = parser.parse_args()
 
@@ -48,6 +49,7 @@ def main() -> int:
 
 
 def build_parser() -> argparse.ArgumentParser:
+    """Construye el analizador de argumentos del CLI."""
     parser = argparse.ArgumentParser(
         description="Ejecuta un sistema P de transicion desde un fichero JSON."
     )
@@ -68,6 +70,7 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def positive_int(value: str) -> int:
+    """Convierte un texto en un entero positivo."""
     try:
         parsed = int(value)
     except ValueError as exc:
@@ -78,6 +81,7 @@ def positive_int(value: str) -> int:
 
 
 def print_step_result(step_result: StepResult) -> None:
+    """Imprime el resultado de un paso."""
     print(f"Paso {step_result.step}")
     if step_result.halted:
         print("  Sin reglas aplicables.")
@@ -89,6 +93,7 @@ def print_step_result(step_result: StepResult) -> None:
 
 
 def print_configuration(configuration: Configuration) -> None:
+    """Imprime una configuracion completa."""
     print(f"Configuracion {configuration.step}")
     for membrane_id, objects in configuration.to_dict().items():
         print(f"  Membrana {membrane_id}: {format_multiset(objects)}")
@@ -96,6 +101,7 @@ def print_configuration(configuration: Configuration) -> None:
 
 
 def format_applied_rule(applied_rule: AppliedRule) -> str:
+    """Formatea una regla aplicada para consola."""
     produced = ", ".join(
         f"{move.symbol}:{move.count}->{move.target}"
         f"(m{move.target_membrane_id})"
@@ -110,6 +116,7 @@ def format_applied_rule(applied_rule: AppliedRule) -> str:
 
 
 def format_multiset(objects: dict[str, int]) -> str:
+    """Formatea un multiconjunto como texto."""
     if not objects:
         return "{}"
     return "{" + ", ".join(f"{symbol}:{count}" for symbol, count in objects.items()) + "}"

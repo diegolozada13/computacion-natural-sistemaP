@@ -22,6 +22,7 @@ DEFAULT_MAX_STEPS = 50
 
 
 def main() -> None:
+    """Renderiza la aplicacion principal de Streamlit."""
     st.set_page_config(page_title="Simulador de Sistemas P", layout="wide")
     st.title("Simulador de Sistemas P")
 
@@ -50,6 +51,7 @@ def main() -> None:
 
 
 def render_system_loader() -> tuple[str | None, PSystem | None]:
+    """Renderiza la carga de ejemplos o ficheros JSON."""
     st.sidebar.header("Sistema")
     source = st.sidebar.radio("Origen JSON", ["Ejemplo", "Subir archivo"])
     loader = JsonLoader()
@@ -85,6 +87,7 @@ def render_system_loader() -> tuple[str | None, PSystem | None]:
 
 
 def render_mode_selector() -> SimulationMode:
+    """Renderiza el selector del modo de simulacion."""
     st.sidebar.header("Ejecucion")
     mode_value = st.sidebar.selectbox(
         "Modo",
@@ -95,6 +98,7 @@ def render_mode_selector() -> SimulationMode:
 
 
 def ensure_simulator(source_key: str | None, psystem: PSystem, mode: SimulationMode) -> None:
+    """Inicializa el simulador cuando cambia la entrada."""
     simulator_key = (source_key, mode.value)
     if st.session_state.get("simulator_key") == simulator_key:
         return
@@ -105,6 +109,7 @@ def ensure_simulator(source_key: str | None, psystem: PSystem, mode: SimulationM
 
 
 def render_controls(simulator: Simulator, max_steps: int) -> None:
+    """Renderiza los controles de ejecucion."""
     st.subheader("Controles")
     step_col, run_col, reset_col = st.columns(3)
 
@@ -125,6 +130,7 @@ def render_controls(simulator: Simulator, max_steps: int) -> None:
 
 
 def render_status(simulator: Simulator) -> None:
+    """Muestra la configuracion actual y su estado."""
     st.subheader("Configuracion actual")
     configuration = simulator.current_configuration
     cols = st.columns(3)
@@ -138,6 +144,7 @@ def render_status(simulator: Simulator) -> None:
 
 
 def render_rules(psystem: PSystem) -> None:
+    """Muestra las reglas definidas en el sistema."""
     st.subheader("Reglas del sistema")
     rows: list[dict[str, Any]] = []
     for membrane_id in sorted(psystem.rules):
@@ -158,6 +165,7 @@ def render_rules(psystem: PSystem) -> None:
 
 
 def render_last_step(step_result: StepResult | None) -> None:
+    """Muestra las reglas aplicadas en el ultimo paso."""
     st.subheader("Ultimo paso")
     if step_result is None:
         st.caption("Todavia no se ha ejecutado ningun paso.")
@@ -174,6 +182,7 @@ def render_last_step(step_result: StepResult | None) -> None:
 
 
 def render_history(history: list[Configuration]) -> None:
+    """Muestra el historial de configuraciones."""
     st.subheader("Historial de configuraciones")
     for configuration in history:
         with st.expander(f"Configuracion {configuration.step}", expanded=False):
@@ -185,6 +194,7 @@ def render_history(history: list[Configuration]) -> None:
 
 
 def list_example_files() -> list[Path]:
+    """Lista los ejemplos JSON disponibles."""
     if not EXAMPLES_DIR.exists():
         st.sidebar.warning("No existe la carpeta examples/.")
         return []
@@ -196,6 +206,7 @@ def list_example_files() -> list[Path]:
 
 
 def multiset_rows(objects: dict[str, int]) -> list[dict[str, Any]]:
+    """Convierte un multiconjunto en filas para una tabla."""
     if not objects:
         return [{"objeto": "-", "multiplicidad": 0}]
     return [
@@ -205,12 +216,14 @@ def multiset_rows(objects: dict[str, int]) -> list[dict[str, Any]]:
 
 
 def format_multiset(objects: dict[str, int]) -> str:
+    """Formatea un multiconjunto como texto."""
     if not objects:
         return "{}"
     return "{" + ", ".join(f"{symbol}:{count}" for symbol, count in objects.items()) + "}"
 
 
 def format_rule_rhs(rule: Rule) -> str:
+    """Formatea el consecuente de una regla."""
     return ", ".join(
         f"{produced.symbol}:{produced.count}->{produced.target}"
         for produced in rule.rhs
@@ -218,6 +231,7 @@ def format_rule_rhs(rule: Rule) -> str:
 
 
 def applied_rule_row(applied_rule: AppliedRule) -> dict[str, Any]:
+    """Convierte una regla aplicada en una fila de tabla."""
     return {
         "regla": applied_rule.rule_id,
         "membrana": applied_rule.membrane_id,

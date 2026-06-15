@@ -15,7 +15,7 @@ STANDARD_MEMBRANE_IDS = {1, 2, 3}
 
 @dataclass
 class PSystem:
-    """Complete definition of a normalized transition P system."""
+    """Representa un sistema P de transicion normalizado."""
 
     alphabet: set[str]
     membranes: dict[int, Membrane]
@@ -24,6 +24,7 @@ class PSystem:
     seed: int | None = None
 
     def __post_init__(self) -> None:
+        """Normaliza y valida la definicion del sistema."""
         self.alphabet = set(self.alphabet)
         self.membranes = dict(self.membranes)
         self.rules = {
@@ -44,6 +45,7 @@ class PSystem:
         output_membrane: int = 1,
         seed: int | None = None,
     ) -> PSystem:
+        """Crea un sistema con la estructura fija de tres membranas."""
         initial_objects = initial_objects or {}
 
         membrane_1 = Membrane(1, objects=Counter(initial_objects.get(1, {})))
@@ -61,11 +63,13 @@ class PSystem:
         )
 
     def validate(self) -> None:
+        """Valida todas las invariantes del sistema."""
         self._validate_alphabet()
         self._validate_membrane_structure()
         self._validate_rules()
 
     def is_valid(self) -> bool:
+        """Indica si la definicion del sistema es valida."""
         try:
             self.validate()
         except ValueError:
@@ -73,21 +77,25 @@ class PSystem:
         return True
 
     def get_membrane(self, membrane_id: int) -> Membrane:
+        """Obtiene una membrana por identificador."""
         try:
             return self.membranes[membrane_id]
         except KeyError as exc:
             raise KeyError(f"unknown membrane {membrane_id}") from exc
 
     def get_rules(self, membrane_id: int) -> list[Rule]:
+        """Devuelve las reglas asociadas a una membrana."""
         self.get_membrane(membrane_id)
         return list(self.rules.get(membrane_id, []))
 
     def add_rule(self, rule: Rule) -> None:
+        """Valida y añade una regla al sistema."""
         rule.validate_against(self.alphabet, self.membranes.keys())
         self._validate_rule_targets(rule)
         self.rules.setdefault(rule.membrane_id, []).append(rule)
 
     def all_rules(self) -> list[Rule]:
+        """Devuelve todas las reglas en orden de membrana."""
         return [
             rule
             for membrane_id in sorted(self.rules)
@@ -95,9 +103,11 @@ class PSystem:
         ]
 
     def initial_configuration(self) -> Configuration:
+        """Construye una copia de la configuracion inicial."""
         return Configuration(self.membranes, step=0).clone()
 
     def valid_targets_for(self, membrane_id: int) -> set[str]:
+        """Calcula los destinos validos para una membrana."""
         membrane = self.get_membrane(membrane_id)
         targets = {"here"}
         if membrane.parent is not None:
@@ -106,6 +116,7 @@ class PSystem:
         return targets
 
     def target_membrane_id(self, source_membrane_id: int, target: str) -> int:
+        """Resuelve un destino al identificador de membrana final."""
         source = self.get_membrane(source_membrane_id)
         if target == "here":
             return source.id
@@ -123,12 +134,14 @@ class PSystem:
         raise ValueError(f"unknown target {target!r}")
 
     def _validate_alphabet(self) -> None:
+        """Valida los simbolos del alfabeto."""
         if not self.alphabet:
             raise ValueError("alphabet must contain at least one symbol")
         for symbol in self.alphabet:
             validate_symbol(symbol, "alphabet symbol")
 
     def _validate_membrane_structure(self) -> None:
+        """Valida la estructura fija de tres membranas."""
         if set(self.membranes) != STANDARD_MEMBRANE_IDS:
             raise ValueError("a normalized P system must contain membranes 1, 2 and 3")
 
@@ -162,6 +175,7 @@ class PSystem:
                 )
 
     def _validate_rules(self) -> None:
+        """Valida las reglas y sus membranas asociadas."""
         unknown_rule_membranes = set(self.rules) - set(self.membranes)
         if unknown_rule_membranes:
             raise ValueError(
@@ -179,6 +193,7 @@ class PSystem:
                 self._validate_rule_targets(rule)
 
     def _validate_rule_targets(self, rule: Rule) -> None:
+        """Valida los destinos de comunicacion de una regla."""
         valid_targets = self.valid_targets_for(rule.membrane_id)
         invalid_targets = rule.targets - valid_targets
         if invalid_targets:
@@ -186,4 +201,3 @@ class PSystem:
                 f"rule {rule.id!r} has invalid targets for membrane {rule.membrane_id}: "
                 f"{sorted(invalid_targets)}"
             )
-

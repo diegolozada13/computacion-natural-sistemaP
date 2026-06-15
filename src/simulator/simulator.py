@@ -10,6 +10,8 @@ from src.simulator.simulation_mode import SimulationMode
 
 @dataclass(frozen=True)
 class ProducedMove:
+    """Describe el movimiento de un objeto producido."""
+
     symbol: str
     count: int
     target: str
@@ -18,6 +20,8 @@ class ProducedMove:
 
 @dataclass(frozen=True)
 class AppliedRule:
+    """Resume una aplicacion concreta de una regla."""
+
     rule_id: str
     membrane_id: int
     consumed: dict[str, int]
@@ -26,21 +30,25 @@ class AppliedRule:
 
 @dataclass(frozen=True)
 class StepResult:
+    """Contiene el resultado de un paso de simulacion."""
+
     step: int
     applied_rules: tuple[AppliedRule, ...]
     halted: bool = False
 
 
 class Simulator:
-    """Simulation engine for transition P systems."""
+    """Ejecuta la evolucion de un sistema P."""
 
     def __init__(self, psystem: PSystem, mode: SimulationMode | str) -> None:
+        """Inicializa el simulador y su historial."""
         self.psystem = psystem
         self.mode = SimulationMode.from_value(mode)
         self.current_configuration = psystem.initial_configuration()
         self.history: list[Configuration] = [self.current_configuration.clone()]
 
     def step(self) -> StepResult:
+        """Ejecuta un paso segun el modo seleccionado."""
         if self.mode is SimulationMode.SEQUENTIAL:
             return self._step_sequential()
         if self.mode is SimulationMode.MAXIMAL_PARALLEL:
@@ -48,6 +56,7 @@ class Simulator:
         raise NotImplementedError(f"unsupported simulation mode {self.mode}")
 
     def _step_sequential(self) -> StepResult:
+        """Ejecuta una unica regla aplicable."""
         selected_rule = self._find_first_applicable_rule()
         if selected_rule is None:
             return StepResult(
@@ -67,6 +76,7 @@ class Simulator:
         )
 
     def _step_maximal_parallel(self) -> StepResult:
+        """Ejecuta un conjunto maximal de reglas aplicables."""
         selected_rules = self._select_ordered_maximal_parallel_rules()
         if not selected_rules:
             return StepResult(
@@ -86,6 +96,7 @@ class Simulator:
         )
 
     def run(self, max_steps: int) -> list[StepResult]:
+        """Ejecuta pasos hasta parada o limite."""
         validate_non_negative_int(max_steps, "max_steps")
 
         results: list[StepResult] = []
@@ -96,12 +107,15 @@ class Simulator:
         return results
 
     def is_halted(self) -> bool:
+        """Indica si no queda ninguna regla aplicable."""
         return self._find_first_applicable_rule() is None
 
     def get_history(self) -> list[Configuration]:
+        """Devuelve copias del historial de configuraciones."""
         return [configuration.clone() for configuration in self.history]
 
     def _find_first_applicable_rule(self) -> Rule | None:
+        """Busca la primera regla aplicable en orden estable."""
         for membrane_id in sorted(self.psystem.membranes):
             membrane = self.current_configuration.get_membrane(membrane_id)
             for rule in self.psystem.get_rules(membrane_id):
@@ -110,6 +124,7 @@ class Simulator:
         return None
 
     def _select_ordered_maximal_parallel_rules(self) -> list[Rule]:
+        """Selecciona reglas maximales reservando objetos."""
         selected_rules: list[Rule] = []
 
         for membrane_id in sorted(self.psystem.membranes):
@@ -135,6 +150,7 @@ class Simulator:
         rules: list[Rule],
         available_objects: Counter[str],
     ) -> Rule | None:
+        """Busca la primera regla aplicable en una lista."""
         for rule in rules:
             if rule.is_applicable(available_objects):
                 return rule
@@ -144,6 +160,7 @@ class Simulator:
         self,
         rules: list[Rule],
     ) -> tuple[Configuration, tuple[AppliedRule, ...]]:
+        """Aplica simultaneamente las reglas seleccionadas."""
         next_configuration = self.current_configuration.clone(
             step=self.current_configuration.step + 1
         )
@@ -163,6 +180,7 @@ class Simulator:
         return next_configuration, applied_rules
 
     def _build_applied_rule(self, rule: Rule) -> AppliedRule:
+        """Construye el resumen de una regla aplicada."""
         produced_moves: list[ProducedMove] = []
         for produced_object in rule.rhs:
             target_membrane_id = self.psystem.target_membrane_id(
