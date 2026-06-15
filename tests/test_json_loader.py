@@ -44,28 +44,28 @@ class JsonLoaderTest(unittest.TestCase):
         data["rules"][0]["membrane"] = 1
         data["rules"][0]["rhs"][0]["target"] = "out"
 
-        with self.assertRaisesRegex(JsonLoaderError, "invalid targets"):
+        with self.assertRaisesRegex(JsonLoaderError, "destinos no válidos"):
             self.loader.load_data(data)
 
     def test_rejects_symbols_outside_alphabet(self) -> None:
         data = self._valid_data()
         data["rules"][0]["rhs"][0]["object"] = "z"
 
-        with self.assertRaisesRegex(JsonLoaderError, "outside the alphabet"):
+        with self.assertRaisesRegex(JsonLoaderError, "fuera del alfabeto"):
             self.loader.load_data(data)
 
     def test_rejects_unknown_rule_membrane(self) -> None:
         data = self._valid_data()
         data["rules"][0]["membrane"] = 4
 
-        with self.assertRaisesRegex(JsonLoaderError, "unknown membranes"):
+        with self.assertRaisesRegex(JsonLoaderError, "membranas desconocidas"):
             self.loader.load_data(data)
 
     def test_rejects_format_errors(self) -> None:
         data = self._valid_data()
         del data["rules"][0]["rhs"]
 
-        with self.assertRaisesRegex(JsonLoaderError, "rules\\[0\\].rhs is required"):
+        with self.assertRaisesRegex(JsonLoaderError, "rules\\[0\\].rhs es obligatorio"):
             self.loader.load_data(data)
 
     def _valid_data(self) -> dict:
@@ -97,4 +97,3 @@ class JsonLoaderTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-

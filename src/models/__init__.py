@@ -1,4 +1,4 @@
-"""Domain models for transition P systems."""
+"""Modelos de dominio para sistemas P de transición."""
 
 from src.models.configuration import Configuration
 from src.models.membrane import Membrane
@@ -13,4 +13,3 @@ __all__ = [
     "PSystem",
     "Rule",
 ]
-

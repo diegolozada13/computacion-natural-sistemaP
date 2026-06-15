@@ -16,13 +16,13 @@ def validate_non_negative_int(value: int, field_name: str) -> None:
         raise ValueError(f"{field_name} tiene que ser un entero no negativo")
 
 
-def validate_symbol(symbol: str, field_name: str = "symbol") -> None:
+def validate_symbol(symbol: str, field_name: str = "símbolo") -> None:
     """Valida un simbolo del alfabeto."""
     if not isinstance(symbol, str) or not symbol.strip():
         raise ValueError(f"{field_name} tiene que ser una cadena no vacía")
 
 
-def validate_identifier(value: str, field_name: str = "identifier") -> None:
+def validate_identifier(value: str, field_name: str = "identificador") -> None:
     """Valida un identificador textual."""
     if not isinstance(value, str) or not value.strip():
         raise ValueError(f"{field_name} tiene que ser una cadena no vacía")
@@ -30,7 +30,7 @@ def validate_identifier(value: str, field_name: str = "identifier") -> None:
 
 def normalize_counter(
     values: Mapping[str, int] | Counter[str] | None,
-    field_name: str = "multiset",
+    field_name: str = "multiconjunto",
 ) -> Counter[str]:
     """Convierte y valida un multiconjunto."""
     counter: Counter[str] = Counter()
@@ -38,7 +38,7 @@ def normalize_counter(
         return counter
 
     for symbol, count in values.items():
-        validate_symbol(symbol, f"{field_name} symbol")
+        validate_symbol(symbol, f"símbolo de {field_name}")
         validate_positive_int(count, f"{field_name}[{symbol!r}]")
         counter[symbol] += count
 

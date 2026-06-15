@@ -24,17 +24,17 @@ class Rule:
 
     def __post_init__(self) -> None:
         """Valida y normaliza la regla."""
-        validate_identifier(self.id, "rule id")
-        validate_positive_int(self.membrane_id, "membrane id")
+        validate_identifier(self.id, "identificador de regla")
+        validate_positive_int(self.membrane_id, "identificador de membrana")
         self.lhs = normalize_counter(self.lhs, "lhs")
         if not self.lhs:
-            raise ValueError("lhs must contain at least one object")
+            raise ValueError("lhs debe contener al menos un objeto")
 
         self.rhs = list(self.rhs)
         if not self.rhs:
-            raise ValueError("rhs must contain at least one produced object")
+            raise ValueError("rhs debe contener al menos un objeto producido")
         if not all(isinstance(produced, ProducedObject) for produced in self.rhs):
-            raise ValueError("rhs must contain only ProducedObject instances")
+            raise ValueError("rhs solo debe contener instancias de ProducedObject")
 
     @property
     def is_cooperative(self) -> bool:
@@ -48,7 +48,7 @@ class Rule:
 
     def is_applicable(self, objects: Mapping[str, int] | Counter[str]) -> bool:
         """Comprueba si la regla puede aplicarse al multiconjunto."""
-        available = normalize_counter(objects, "objects")
+        available = normalize_counter(objects, "objetos")
         return counter_contains(available, self.lhs)
 
     def consumed_objects(self) -> Counter[str]:
@@ -70,7 +70,10 @@ class Rule:
     ) -> None:
         """Valida la regla frente al alfabeto y las membranas."""
         if membrane_ids is not None and self.membrane_id not in set(membrane_ids):
-            raise ValueError(f"rule {self.id!r} references unknown membrane {self.membrane_id}")
+            raise ValueError(
+                f"la regla {self.id!r} referencia la membrana desconocida "
+                f"{self.membrane_id}"
+            )
 
         if alphabet is None:
             return
@@ -79,5 +82,6 @@ class Rule:
         unknown_symbols -= alphabet
         if unknown_symbols:
             raise ValueError(
-                f"rule {self.id!r} uses symbols outside the alphabet: {sorted(unknown_symbols)}"
+                f"la regla {self.id!r} usa símbolos fuera del alfabeto: "
+                f"{sorted(unknown_symbols)}"
             )

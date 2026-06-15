@@ -16,16 +16,17 @@ class Configuration:
 
     def __post_init__(self) -> None:
         """Valida los datos de la configuracion."""
-        validate_non_negative_int(self.step, "step")
+        validate_non_negative_int(self.step, "paso")
         if not self.membranes:
-            raise ValueError("configuration must contain at least one membrane")
+            raise ValueError("la configuración debe contener al menos una membrana")
 
         self.membranes = dict(self.membranes)
         for membrane_id, membrane in self.membranes.items():
-            validate_positive_int(membrane_id, "membrane id")
+            validate_positive_int(membrane_id, "identificador de membrana")
             if membrane.id != membrane_id:
                 raise ValueError(
-                    f"membrane key {membrane_id} does not match membrane id {membrane.id}"
+                    f"la clave de membrana {membrane_id} no coincide con "
+                    f"el identificador {membrane.id}"
                 )
 
     def get_membrane(self, membrane_id: int) -> Membrane:
@@ -33,7 +34,7 @@ class Configuration:
         try:
             return self.membranes[membrane_id]
         except KeyError as exc:
-            raise KeyError(f"unknown membrane {membrane_id}") from exc
+            raise KeyError(f"membrana desconocida: {membrane_id}") from exc
 
     def objects_in(self, membrane_id: int) -> Counter[str]:
         """Devuelve una copia de los objetos de una membrana."""

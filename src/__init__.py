@@ -1,2 +1,1 @@
-"""P system simulator package."""
-
+"""Paquete del simulador de sistemas P."""

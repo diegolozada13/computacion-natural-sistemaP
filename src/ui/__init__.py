@@ -1,2 +1,1 @@
-"""Streamlit user interface package."""
-
+"""Interfaz de usuario desarrollada con Streamlit."""

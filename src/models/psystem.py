@@ -81,7 +81,7 @@ class PSystem:
         try:
             return self.membranes[membrane_id]
         except KeyError as exc:
-            raise KeyError(f"unknown membrane {membrane_id}") from exc
+            raise KeyError(f"membrana desconocida: {membrane_id}") from exc
 
     def get_rules(self, membrane_id: int) -> list[Rule]:
         """Devuelve las reglas asociadas a una membrana."""
@@ -122,33 +122,42 @@ class PSystem:
             return source.id
         if target == "out":
             if source.parent is None:
-                raise ValueError(f"membrane {source.id} has no parent for target 'out'")
+                raise ValueError(
+                    f"la membrana {source.id} no tiene padre para el destino 'out'"
+                )
             return source.parent.id
         if target.startswith("in_"):
-            target_id = int(target.removeprefix("in_"))
+            try:
+                target_id = int(target.removeprefix("in_"))
+            except ValueError as exc:
+                raise ValueError(f"destino desconocido: {target!r}") from exc
             if source.get_child(target_id) is None:
                 raise ValueError(
-                    f"membrane {target_id} is not a direct child of membrane {source.id}"
+                    f"la membrana {target_id} no es hija directa de la membrana "
+                    f"{source.id}"
                 )
             return target_id
-        raise ValueError(f"unknown target {target!r}")
+        raise ValueError(f"destino desconocido: {target!r}")
 
     def _validate_alphabet(self) -> None:
         """Valida los simbolos del alfabeto."""
         if not self.alphabet:
-            raise ValueError("alphabet must contain at least one symbol")
+            raise ValueError("el alfabeto debe contener al menos un símbolo")
         for symbol in self.alphabet:
-            validate_symbol(symbol, "alphabet symbol")
+            validate_symbol(symbol, "símbolo del alfabeto")
 
     def _validate_membrane_structure(self) -> None:
         """Valida la estructura fija de tres membranas."""
         if set(self.membranes) != STANDARD_MEMBRANE_IDS:
-            raise ValueError("a normalized P system must contain membranes 1, 2 and 3")
+            raise ValueError(
+                "un sistema P normalizado debe contener las membranas 1, 2 y 3"
+            )
 
         for membrane_id, membrane in self.membranes.items():
             if membrane.id != membrane_id:
                 raise ValueError(
-                    f"membrane key {membrane_id} does not match membrane id {membrane.id}"
+                    f"la clave de membrana {membrane_id} no coincide con "
+                    f"el identificador {membrane.id}"
                 )
 
         membrane_1 = self.membranes[1]
@@ -156,21 +165,23 @@ class PSystem:
         membrane_3 = self.membranes[3]
 
         if membrane_1.parent is not None:
-            raise ValueError("membrane 1 must not have a parent")
+            raise ValueError("la membrana 1 no debe tener membrana padre")
         if membrane_2.parent is not membrane_1 or membrane_3.parent is not membrane_2:
-            raise ValueError("membrane structure must be [1 [2 [3]3 ]2 ]1")
+            raise ValueError("la estructura de membranas debe ser [1 [2 [3]3 ]2 ]1")
         if membrane_1.child_ids() != {2} or membrane_2.child_ids() != {3}:
-            raise ValueError("membrane structure must be [1 [2 [3]3 ]2 ]1")
+            raise ValueError("la estructura de membranas debe ser [1 [2 [3]3 ]2 ]1")
         if membrane_3.children:
-            raise ValueError("membrane 3 must not have children")
+            raise ValueError("la membrana 3 no debe tener membranas hijas")
         if self.output_membrane not in self.membranes:
-            raise ValueError(f"unknown output membrane {self.output_membrane}")
+            raise ValueError(
+                f"membrana de salida desconocida: {self.output_membrane}"
+            )
 
         for membrane in self.membranes.values():
             unknown_symbols = set(membrane.objects) - self.alphabet
             if unknown_symbols:
                 raise ValueError(
-                    f"membrane {membrane.id} contains symbols outside the alphabet: "
+                    f"la membrana {membrane.id} contiene símbolos fuera del alfabeto: "
                     f"{sorted(unknown_symbols)}"
                 )
 
@@ -179,15 +190,17 @@ class PSystem:
         unknown_rule_membranes = set(self.rules) - set(self.membranes)
         if unknown_rule_membranes:
             raise ValueError(
-                f"rules reference unknown membranes: {sorted(unknown_rule_membranes)}"
+                "las reglas referencian membranas desconocidas: "
+                f"{sorted(unknown_rule_membranes)}"
             )
 
         for membrane_id, membrane_rules in self.rules.items():
             for rule in membrane_rules:
                 if rule.membrane_id != membrane_id:
                     raise ValueError(
-                        f"rule {rule.id!r} is stored under membrane {membrane_id} "
-                        f"but references membrane {rule.membrane_id}"
+                        f"la regla {rule.id!r} está almacenada en la membrana "
+                        f"{membrane_id}, pero referencia la membrana "
+                        f"{rule.membrane_id}"
                     )
                 rule.validate_against(self.alphabet, self.membranes.keys())
                 self._validate_rule_targets(rule)
@@ -198,6 +211,7 @@ class PSystem:
         invalid_targets = rule.targets - valid_targets
         if invalid_targets:
             raise ValueError(
-                f"rule {rule.id!r} has invalid targets for membrane {rule.membrane_id}: "
+                f"la regla {rule.id!r} tiene destinos no válidos para la "
+                f"membrana {rule.membrane_id}: "
                 f"{sorted(invalid_targets)}"
             )

@@ -19,10 +19,11 @@ class ProducedObject:
     def __post_init__(self) -> None:
         """Valida el objeto producido."""
         validate_symbol(self.symbol)
-        validate_positive_int(self.count, "count")
+        validate_positive_int(self.count, "cantidad")
         if self.target not in VALID_TARGETS:
             raise ValueError(
-                f"target must be one of {sorted(VALID_TARGETS)}, got {self.target!r}"
+                f"el destino debe ser uno de {sorted(VALID_TARGETS)}; "
+                f"se recibió {self.target!r}"
             )
 
     @property

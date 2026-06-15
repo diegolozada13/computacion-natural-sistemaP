@@ -29,7 +29,7 @@ def main() -> None:
     source_key, psystem = render_system_loader()
     mode = render_mode_selector()
     max_steps = st.sidebar.number_input(
-        "Max steps",
+        "Máximo de pasos",
         min_value=1,
         max_value=10_000,
         value=DEFAULT_MAX_STEPS,
@@ -37,7 +37,7 @@ def main() -> None:
     )
 
     if psystem is None:
-        st.info("Selecciona o sube un JSON valido para iniciar la simulacion.")
+        st.info("Selecciona o sube un JSON válido para iniciar la simulación.")
         return
 
     ensure_simulator(source_key, psystem, mode)
@@ -81,14 +81,22 @@ def render_system_loader() -> tuple[str | None, PSystem | None]:
         source_hash = hashlib.sha256(file_bytes).hexdigest()
         data = json.loads(file_bytes.decode("utf-8"))
         return f"upload:{uploaded_file.name}:{source_hash}", loader.load_data(data)
-    except (UnicodeDecodeError, json.JSONDecodeError, JsonLoaderError, ValueError) as exc:
+    except UnicodeDecodeError:
+        st.error("El fichero debe estar codificado en UTF-8.")
+        return None, None
+    except json.JSONDecodeError as exc:
+        st.error(
+            f"El JSON no es válido en la línea {exc.lineno}, columna {exc.colno}."
+        )
+        return None, None
+    except (JsonLoaderError, ValueError) as exc:
         st.error(f"Error al cargar el JSON: {exc}")
         return None, None
 
 
 def render_mode_selector() -> SimulationMode:
     """Renderiza el selector del modo de simulacion."""
-    st.sidebar.header("Ejecucion")
+    st.sidebar.header("Ejecución")
     mode_value = st.sidebar.selectbox(
         "Modo",
         [SimulationMode.SEQUENTIAL.value, SimulationMode.MAXIMAL_PARALLEL.value],
@@ -131,7 +139,7 @@ def render_controls(simulator: Simulator, max_steps: int) -> None:
 
 def render_status(simulator: Simulator) -> None:
     """Muestra la configuracion actual y su estado."""
-    st.subheader("Configuracion actual")
+    st.subheader("Configuración actual")
     configuration = simulator.current_configuration
     cols = st.columns(3)
     for index, membrane_id in enumerate((1, 2, 3)):
@@ -140,7 +148,7 @@ def render_status(simulator: Simulator) -> None:
             st.table(multiset_rows(configuration.objects_in(membrane_id)))
 
     if simulator.is_halted():
-        st.success("Configuracion de parada alcanzada.")
+        st.success("Configuración de parada alcanzada.")
 
 
 def render_rules(psystem: PSystem) -> None:
@@ -153,8 +161,8 @@ def render_rules(psystem: PSystem) -> None:
                 {
                     "membrana": membrane_id,
                     "id": rule.id,
-                    "lhs": format_multiset(rule.consumed_objects()),
-                    "rhs": format_rule_rhs(rule),
+                    "antecedente": format_multiset(rule.consumed_objects()),
+                    "consecuente": format_rule_rhs(rule),
                 }
             )
 
@@ -168,10 +176,10 @@ def render_last_step(step_result: StepResult | None) -> None:
     """Muestra las reglas aplicadas en el ultimo paso."""
     st.subheader("Ultimo paso")
     if step_result is None:
-        st.caption("Todavia no se ha ejecutado ningun paso.")
+        st.caption("Todavía no se ha ejecutado ningún paso.")
         return
     if step_result.halted:
-        st.info("No habia reglas aplicables.")
+        st.info("No había reglas aplicables.")
         return
 
     st.dataframe(
@@ -185,7 +193,7 @@ def render_history(history: list[Configuration]) -> None:
     """Muestra el historial de configuraciones."""
     st.subheader("Historial de configuraciones")
     for configuration in history:
-        with st.expander(f"Configuracion {configuration.step}", expanded=False):
+        with st.expander(f"Configuración {configuration.step}", expanded=False):
             cols = st.columns(3)
             for index, membrane_id in enumerate((1, 2, 3)):
                 with cols[index]:

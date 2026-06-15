@@ -23,8 +23,8 @@ class Membrane:
 
     def __post_init__(self) -> None:
         """Valida y normaliza la membrana."""
-        validate_positive_int(self.id, "membrane id")
-        self.objects = normalize_counter(self.objects, "objects")
+        validate_positive_int(self.id, "identificador de membrana")
+        self.objects = normalize_counter(self.objects, "objetos")
         children = list(self.children)
         self.children = []
         for child in children:
@@ -33,11 +33,11 @@ class Membrane:
     def add_child(self, child: Membrane) -> None:
         """Añade una membrana hija."""
         if child is self:
-            raise ValueError("a membrane cannot be its own child")
+            raise ValueError("una membrana no puede ser hija de sí misma")
         if self.has_child(child.id):
             return
         if child.parent is not None and child.parent is not self:
-            raise ValueError(f"membrane {child.id} already has a parent")
+            raise ValueError(f"la membrana {child.id} ya tiene una membrana padre")
 
         child.parent = self
         self.children.append(child)
@@ -57,20 +57,21 @@ class Membrane:
     def add_object(self, symbol: str, count: int = 1) -> None:
         """Añade objetos al multiconjunto de la membrana."""
         validate_symbol(symbol)
-        validate_positive_int(count, "count")
+        validate_positive_int(count, "cantidad")
         self.objects[symbol] += count
 
     def add_objects(self, objects: Mapping[str, int] | Counter[str]) -> None:
         """Añade un multiconjunto de objetos."""
-        self.objects.update(normalize_counter(objects, "objects"))
+        self.objects.update(normalize_counter(objects, "objetos"))
 
     def remove_object(self, symbol: str, count: int = 1) -> None:
         """Elimina objetos si hay multiplicidad suficiente."""
         validate_symbol(symbol)
-        validate_positive_int(count, "count")
+        validate_positive_int(count, "cantidad")
         if self.objects[symbol] < count:
             raise ValueError(
-                f"membrane {self.id} has {self.objects[symbol]} occurrences of {symbol!r}"
+                f"la membrana {self.id} tiene {self.objects[symbol]} "
+                f"ocurrencias de {symbol!r}"
             )
 
         self.objects[symbol] -= count
@@ -79,9 +80,11 @@ class Membrane:
 
     def remove_objects(self, objects: Mapping[str, int] | Counter[str]) -> None:
         """Elimina un multiconjunto de objetos."""
-        normalized = normalize_counter(objects, "objects")
+        normalized = normalize_counter(objects, "objetos")
         if not self.contains(normalized):
-            raise ValueError(f"membrane {self.id} does not contain the required objects")
+            raise ValueError(
+                f"la membrana {self.id} no contiene los objetos necesarios"
+            )
 
         self.objects.subtract(normalized)
         self.objects = +self.objects
@@ -93,7 +96,7 @@ class Membrane:
 
     def contains(self, objects: Mapping[str, int] | Counter[str]) -> bool:
         """Comprueba la disponibilidad de un multiconjunto."""
-        normalized = normalize_counter(objects, "objects")
+        normalized = normalize_counter(objects, "objetos")
         return counter_contains(self.objects, normalized)
 
     def objects_copy(self) -> Counter[str]:

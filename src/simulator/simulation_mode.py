@@ -14,4 +14,7 @@ class SimulationMode(str, Enum):
         """Convierte un texto o enum en un modo de simulacion."""
         if isinstance(value, cls):
             return value
-        return cls(value)
+        try:
+            return cls(value)
+        except ValueError as exc:
+            raise ValueError(f"modo de simulación no válido: {value!r}") from exc

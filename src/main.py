@@ -15,6 +15,25 @@ from src.simulator import AppliedRule, SimulationMode, Simulator, StepResult
 DEFAULT_MAX_STEPS = 50
 
 
+class SpanishArgumentParser(argparse.ArgumentParser):
+    """Muestra la ayuda y los errores de argumentos en español."""
+
+    def format_usage(self) -> str:
+        """Traduce el encabezado de uso."""
+        return super().format_usage().replace("usage:", "uso:", 1)
+
+    def format_help(self) -> str:
+        """Traduce el encabezado de uso dentro de la ayuda."""
+        return super().format_help().replace("usage:", "uso:", 1)
+
+    def error(self, message: str) -> None:
+        """Finaliza con un mensaje genérico en español."""
+        self.exit(
+            2,
+            f"Error: argumentos no válidos. Usa '{self.prog} --help' para ver la ayuda.\n",
+        )
+
+
 def main() -> int:
     """Ejecuta el simulador desde la linea de comandos."""
     parser = build_parser()
@@ -41,30 +60,39 @@ def main() -> int:
         steps_executed += 1
 
     if simulator.is_halted():
-        print("Configuracion de parada alcanzada.")
+        print("Configuración de parada alcanzada.")
     else:
-        print(f"Limite de pasos alcanzado ({args.max_steps}).")
+        print(f"Límite de pasos alcanzado ({args.max_steps}).")
 
     return 0
 
 
 def build_parser() -> argparse.ArgumentParser:
     """Construye el analizador de argumentos del CLI."""
-    parser = argparse.ArgumentParser(
-        description="Ejecuta un sistema P de transicion desde un fichero JSON."
+    parser = SpanishArgumentParser(
+        add_help=False,
+        description="Ejecuta un sistema P de transición desde un fichero JSON.",
+    )
+    parser._positionals.title = "argumentos posicionales"
+    parser._optionals.title = "opciones"
+    parser.add_argument(
+        "-h",
+        "--help",
+        action="help",
+        help="Muestra esta ayuda y termina.",
     )
     parser.add_argument("json_path", type=Path, help="Ruta del fichero JSON del sistema P.")
     parser.add_argument(
         "--mode",
         choices=[mode.value for mode in SimulationMode],
         default=SimulationMode.MAXIMAL_PARALLEL.value,
-        help="Modo de simulacion.",
+        help="Modo de simulación.",
     )
     parser.add_argument(
         "--max-steps",
         type=positive_int,
         default=DEFAULT_MAX_STEPS,
-        help=f"Numero maximo de pasos a ejecutar. Por defecto: {DEFAULT_MAX_STEPS}.",
+        help=f"Número máximo de pasos a ejecutar. Por defecto: {DEFAULT_MAX_STEPS}.",
     )
     return parser
 
@@ -94,7 +122,7 @@ def print_step_result(step_result: StepResult) -> None:
 
 def print_configuration(configuration: Configuration) -> None:
     """Imprime una configuracion completa."""
-    print(f"Configuracion {configuration.step}")
+    print(f"Configuración {configuration.step}")
     for membrane_id, objects in configuration.to_dict().items():
         print(f"  Membrana {membrane_id}: {format_multiset(objects)}")
     print()

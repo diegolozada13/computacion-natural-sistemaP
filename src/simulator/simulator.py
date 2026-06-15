@@ -53,7 +53,7 @@ class Simulator:
             return self._step_sequential()
         if self.mode is SimulationMode.MAXIMAL_PARALLEL:
             return self._step_maximal_parallel()
-        raise NotImplementedError(f"unsupported simulation mode {self.mode}")
+        raise NotImplementedError(f"modo de simulación no compatible: {self.mode}")
 
     def _step_sequential(self) -> StepResult:
         """Ejecuta una unica regla aplicable."""
