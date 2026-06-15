@@ -15,8 +15,8 @@ from src.simulator import AppliedRule, SimulationMode, Simulator, StepResult
 DEFAULT_MAX_STEPS = 50
 
 
-class SpanishArgumentParser(argparse.ArgumentParser):
-    """Muestra la ayuda y los errores de argumentos en español."""
+class ArgumentParser(argparse.ArgumentParser):
+    """Override de argpasrse.ArgumentParser para mostrar la ayuda y los errores de argumentos en español."""
 
     def format_usage(self) -> str:
         """Traduce el encabezado de uso."""
@@ -69,7 +69,7 @@ def main() -> int:
 
 def build_parser() -> argparse.ArgumentParser:
     """Construye el analizador de argumentos del CLI."""
-    parser = SpanishArgumentParser(
+    parser = ArgumentParser(
         add_help=False,
         description="Ejecuta un sistema P de transición desde un fichero JSON.",
     )
